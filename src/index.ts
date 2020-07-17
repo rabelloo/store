@@ -1,3 +1,5 @@
 export { createStore } from './createStore';
-export { createStoreContext } from './react/createStoreContext';
 export { my } from './helpers/my';
+export { freeze } from './middleware/freeze';
+export { logger } from './middleware/logger';
+export { createStoreContext } from './react/createStoreContext';

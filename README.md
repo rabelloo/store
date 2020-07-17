@@ -4,6 +4,15 @@ Redux reimagined with usability in mind and React hooks.
 
 TODO: find a good name
 
+## Table of contents
+
+- [Philosophy](#Philosophy)
+- [Installation](#Installation)
+- [Usage](#Usage)
+- [Config](#Config)
+- [Middleware](#Middleware)
+- [Async](#Async)
+
 ## Philosophy
 
 - All you need to create a store is your initial state.
@@ -44,6 +53,9 @@ npm i store
 
 ## Usage
 
+- [Vanilla](#Vanilla)
+- [React](#React)
+
 ### Vanilla
 
 ```ts
@@ -63,10 +75,11 @@ console.log(store.state);
 ```ts
 // register reducers per type and get their dispatcher
 const type = 'foo';
-const reducer = (state, myPayload: boolean) => state;
-const dispatch = store.on(type, reducer);
+const reducer = (state, foo: boolean) => state;
+const dispatchFoo = store.on(type, reducer);
 
-dispatch(true);
+dispatchFoo(true);
+// same as `store.dispatch({ type, payload: true });`
 
 console.log(store.state);
 // { count: 0 }
@@ -85,7 +98,7 @@ setCount(5);
 console.log(store.state);
 // { count: 5 }
 
-// or you can slice() your state :D
+// or you can `slice()` your state :D
 const incrementCount = store
   .slice('count')
   .on('[My Component] increment count', (count, mod: number) => count + mod);
@@ -100,9 +113,10 @@ console.log(store.state);
 // you can also dispatch actions directly on the store or slices.
 // There's no advantage in doing so, and not having the type registered
 // will throw an error if your `mode` is "development".
-// See config for more.
 store.dispatch({ type: 'my action', payload: { optional: true } });
 ```
+
+See [config](#config) for more.
 
 ```ts
 // subscribe to changes
@@ -124,7 +138,7 @@ store.dispatch(/* action that changes `state` */);
 // foo: false
 ```
 
-#### React
+### React
 
 Also see [examples/react](/examples/react)
 
@@ -193,7 +207,7 @@ export function FooInput() {
   return (
     <input
       defaultValue={foo}
-      onClick={(ev) => setFoo(ev.currentTarget.value)}
+      onInput={(ev) => setFoo(ev.currentTarget.value)}
     />
   );
 }
@@ -216,4 +230,155 @@ const [fooBar, setFooBar] = useStore({
   // same as ['foo', 'bar']
   // but now with TypeScript suggestions as you type
 });
+```
+
+Also see [examples/react](/examples/react)
+
+## Config
+
+```ts
+const initialState = {};
+
+// config is second argument
+const store = createStore(initialState, {
+  mode: 'development' || 'test' || 'production',
+  middleware: [myMiddleware, anotherMiddleware],
+});
+
+// when not specified, the default is:
+const defaultConfig = {
+  mode: process.env.NODE_ENV || 'production',
+  middleware: mode === 'development' ? [logger(), freeze()] : [],
+};
+
+// each config field has to be overriden individually.
+// e.g. this will still have the default middleware applied
+const store = createStore(initialState, {
+  mode: 'development',
+});
+```
+
+### Mode
+
+Running in 'development' has one major difference:
+
+> When an unregistered `type` of action is dispatched, an Error will be thrown.
+
+This helps find bugs earlier in the development cycle, as `types` are untyped (TypeScript wise), and you might not see typos or other errors.
+
+```ts
+// e.g.
+const sendMyAction = store.on('my action', (state) => state);
+
+// will never throw as the `type` is captured in the closure
+sendMyAction();
+
+// not recommended, but here's where the Error being thrown helps
+store.dispatch({ type: 'my actio' });
+// Error('No registered reducer for "my actio"')
+```
+
+It is recommended you set the environment variable `NODE_ENV` depending on where you're running code.
+
+That way the `config`'s `mode` and `middleware` will be applied correctly per environment, as suggested in [Config](#Config).
+
+Still, if you have a different way to determine your environment, feel free to pass a variable to your config.
+
+```ts
+const store = createStore(initialState, {
+  mode: isProduction ? 'production' : 'development',
+});
+```
+
+## Middleware
+
+Middleware are functions that run on every dispatch just after the reducer, but before setting the state.
+
+There are two middleware provided, and they are applied by default when `mode === 'development'`:
+
+- [Freeze](#Freeze)
+- [Logger](#Logger)
+
+You can also create your own middleware to do what you will - e.g. logging to an external tool like DataDog.
+
+```ts
+export function myMiddleware<State>(): Middleware<State> {
+  return ({ action, from, nextState, state }) => {
+    DataDog.send({ action, from, nextState, state });
+
+    // don't forget to return `nextState` or you might be left wondering
+    // why your state is suddenly `undefined`.
+    return nextState;
+  };
+}
+```
+
+`action` is e.g. `{ type, payload }`
+
+`from` is:
+
+- a string or symbol that represents the slice path.
+- an unique key that might not be deterministic. **Try not to rely on its format.**
+- e.g. root is `Symbol('@store root')`
+- e.g. `slice('foo', 'bar')` is `'foo.bar'`
+
+`nextState` is the output from the reducer, or from the previous middleware.
+
+`state` is the current state of the slice or store.
+
+### Freeze
+
+TODO
+
+### Logger
+
+TODO
+
+## Async
+
+You might be familiar with the concept of thunk middleware, or sagas, or asynchronous action dispatchers.
+
+Due to how this repo has been designed there should be no need for those, see:
+
+```ts
+// recommended (optimistic)
+async function asyncOptimisticDispatch() {
+  store.dispatch({ type: '[foo] optmistic value set', payload: true });
+
+  try {
+    const payload = await fetch('my/api');
+    store.dispatch({ type: '[foo] success', payload });
+  } catch (error) {
+    store.dispatch({ type: '[foo] failed to fetch value' });
+  }
+}
+
+// recommended (pessimistic)
+async function asyncPessimisticDispatch() {
+  store.dispatch({ type: '[foo] start loading' });
+
+  try {
+    const payload = await fetch('my/api');
+    store.dispatch({ type: '[foo] success / value set', payload });
+  } catch (error) {
+    store.dispatch({ type: '[foo] failed to fetch value' });
+  }
+}
+```
+
+But if for some reason you like async middleware feel free to use it.
+
+```ts
+// not recommended, but one example
+export function asyncMiddleware<State>(): Middleware<State> {
+  return async ({ action, from, nextState, state }) => {
+    return await nextState;
+  };
+}
+
+const asyncSetState = store.on('[foo] async set', () =>
+  fetch('my/api').then((data) => data.json())
+);
+
+asyncSetState();
 ```

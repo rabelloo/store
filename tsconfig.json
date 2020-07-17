@@ -1,0 +1,25 @@
+{
+  "include": ["src/**/*", "examples/**/*"],
+  "exclude": ["src/**/*.spec.*"],
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDirs": ["src", "examples"],
+
+    "module": "esnext",
+    "moduleResolution": "node",
+    "target": "es2019",
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "jsx": "react",
+    "lib": ["esnext", "dom"],
+
+    "alwaysStrict": true,
+    "declaration": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "skipLibCheck": false,
+    "strictNullChecks": true
+  }
+}

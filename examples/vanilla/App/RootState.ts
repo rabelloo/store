@@ -1,5 +1,5 @@
 import { html } from 'lit-html';
-import { State } from './store';
+import { State } from '../store';
 
 export const RootState = (state: State) => {
   console.log('render RootState', state);

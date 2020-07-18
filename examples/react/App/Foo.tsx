@@ -1,5 +1,5 @@
 import React from 'react';
-import { useStore } from './store';
+import { useStore } from '../store';
 
 export const Foo = () => {
   const [foo, setFooBar] = useStore({

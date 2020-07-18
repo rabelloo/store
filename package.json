@@ -5,7 +5,9 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "parcel ./examples/react/index.html --open",
+    "start": "npm run start:react",
+    "start:react": "parcel ./examples/react/index.html --open --port 1001",
+    "start:vanilla": "parcel ./examples/vanilla/index.html --open --port 1002",
     "prebuild": "rm -rf dist",
     "build": "tsc --build tsconfig.build.json",
     "lint": "eslint . && prettier . -c",
@@ -23,6 +25,7 @@
     "eslint-plugin-react": "^7.20.3",
     "eslint-plugin-react-hooks": "^4.0.8",
     "jest": "^26.1.0",
+    "lit-html": "^1.2.1",
     "parcel": "2.0.0-beta.1",
     "prettier": "^2.0.5",
     "react": "^16.13.1",

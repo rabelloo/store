@@ -1,4 +1,4 @@
-# Store
+# Store ~ [![ci](https://github.com/rabelloo/store/workflows/ci/badge.svg)](/actions) [![codecov](https://codecov.io/gh/rabelloo/store/branch/master/graph/badge.svg)](https://codecov.io/gh/rabelloo/store) [![dependencies](https://img.shields.io/david/rabelloo/store.svg)](https://david-dm.org/rabelloo/store)
 
 Redux reimagined with usability in mind and React hooks.
 

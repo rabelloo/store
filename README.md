@@ -116,7 +116,7 @@ console.log(store.state);
 store.dispatch({ type: 'my action', payload: { optional: true } });
 ```
 
-See [config](#config) for more.
+See [Config](#Config) for more.
 
 ```ts
 // subscribe to changes
@@ -260,11 +260,11 @@ const store = createStore(initialState, {
 
 ### Mode
 
-Running in 'development' has one major difference:
+Running in `development` has one major difference:
 
-> When an unregistered `type` of action is dispatched, an Error will be thrown.
+> When an unregistered `type` of action is dispatched, an `Error` will be thrown.
 
-This helps find bugs earlier in the development cycle, as `types` are untyped (TypeScript wise), and you might not see typos or other errors.
+This helps find bugs earlier in the development cycle, as `types` are untyped (TypeScript wise), and you might not catch typos or other errors.
 
 ```ts
 // e.g.
@@ -296,8 +296,11 @@ Middleware are functions that run on every dispatch just after the reducer, but 
 
 There are two middleware provided, and they are applied by default when `mode === 'development'`:
 
-- [Freeze](#Freeze)
-- [Logger](#Logger)
+- [Freeze](/src/middleware/freeze) - Deeply freezes every action's payload dispatched to store.
+  - Useful to ensure state is immutable.
+  - Not recommended in `production`.
+- [Logger](/src/middleware/logger) - Logs all middleware arguments on every action dispatch to store.
+  - Useful to track changes and debug state.
 
 You can also create your own middleware to do what you will - e.g. logging to an external tool like DataDog.
 
@@ -326,24 +329,16 @@ export function myMiddleware<State>(): Middleware<State> {
 
 `state` is the current state of the slice or store.
 
-### Freeze
-
-TODO
-
-### Logger
-
-TODO
-
 ## Async
 
 You might be familiar with the concept of thunk middleware, or sagas, or asynchronous action dispatchers.
 
-Due to how this repo has been designed there should be no need for those, see:
+Due to how this library has been designed there should be no need for those, see:
 
 ```ts
 // recommended (optimistic)
 async function asyncOptimisticDispatch() {
-  store.dispatch({ type: '[foo] optmistic value set', payload: true });
+  store.dispatch({ type: '[foo] optimistic value set', payload: true });
 
   try {
     const payload = await fetch('my/api');
@@ -376,9 +371,7 @@ export function asyncMiddleware<State>(): Middleware<State> {
   };
 }
 
-const asyncSetState = store.on('[foo] async set', () =>
-  fetch('my/api').then((data) => data.json())
-);
+const asyncSetFoo = store.on('[foo] async set', () => fetch('my/api'));
 
-asyncSetState();
+asyncSetFoo();
 ```

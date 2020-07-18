@@ -1,7 +1,7 @@
 import { logger } from './logger';
 
 describe('logger', () => {
-  const log = logger<any>();
+  const log = logger();
   jest.spyOn(console, 'group').mockImplementation();
   jest.spyOn(console, 'log').mockImplementation();
   jest.spyOn(console, 'groupEnd').mockImplementation();

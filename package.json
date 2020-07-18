@@ -1,8 +1,16 @@
 {
   "name": "store",
   "version": "0.1.0",
-  "author": "Andre Luiz Rabello",
+  "author": "Andre Luiz Rabello <andre.luiz_r@hotmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rabelloo/store.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rabelloo/store/issues"
+  },
+  "homepage": "https://github.com/rabelloo/store#readme",
   "private": true,
   "scripts": {
     "start": "npm run start:react",

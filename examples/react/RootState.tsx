@@ -1,7 +1,7 @@
 import React from 'react';
 import { useStore } from './store';
 
-export const State = () => {
+export const RootState = () => {
   const [state] = useStore();
   console.log('render State', state);
 

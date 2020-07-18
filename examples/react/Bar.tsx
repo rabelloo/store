@@ -9,5 +9,5 @@ export const Bar = () => {
   });
   console.log('render Bar', bar);
 
-  return <input value={bar} onChange={(e) => setBar(e.target.value)} />;
+  return <input value={bar} onInput={(ev) => setBar(ev.currentTarget.value)} />;
 };

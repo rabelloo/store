@@ -9,5 +9,10 @@ export const Foo = () => {
   });
   console.log('render Foo', foo);
 
-  return <input value={foo.bar} onChange={(e) => setFooBar(e.target.value)} />;
+  return (
+    <input
+      value={foo.bar}
+      onInput={(ev) => setFooBar(ev.currentTarget.value)}
+    />
+  );
 };

@@ -58,6 +58,8 @@ npm i store
 
 ### Vanilla
 
+Also see [examples/vanilla](/examples/vanilla)
+
 ```ts
 import { createStore } from 'store';
 
@@ -137,6 +139,8 @@ store.dispatch(/* action that changes `state` */);
 // count: 0
 // foo: false
 ```
+
+Also see [examples/vanilla](/examples/vanilla)
 
 ### React
 

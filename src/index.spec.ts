@@ -7,7 +7,10 @@ describe('index', () => {
     expect(index).toEqual({
       createStore: anyFn,
       createStoreContext: anyFn,
+      freeze: anyFn,
+      logger: anyFn,
       my: anyFn,
+      persist: anyFn,
     });
   });
 });

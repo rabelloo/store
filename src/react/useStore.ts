@@ -16,7 +16,7 @@ import type { Matcher } from './matcher.type';
 export function useStore<State extends Entity, Select, Payload>(
   StoreContext: React.Context<Store<State>>,
   dispatchers: Index<Dispatcher<unknown>>,
-  arg?: Unary<State, Select> | Matcher<State, Payload>
+  arg?: ((state: State) => Select) | Matcher<State, Payload>
 ) {
   const store = useContext(StoreContext);
 
@@ -61,8 +61,8 @@ function getDispatcher<State extends Entity, Payload>(
 
 function overload<State extends Entity, Payload, Select>(
   store: Store<State>,
-  arg?: Unary<State, Select> | Matcher<State, Payload, any> // eslint-disable-line @typescript-eslint/no-explicit-any
-): UnaryTuple<State> | UnaryTuple<State, Select> | UnaryTriple<State, Payload> {
+  arg?: ((state: State) => Select) | Matcher<State, Payload, any> // eslint-disable-line @typescript-eslint/no-explicit-any
+): Triple<State, Select, Payload> {
   // useStore()
   if (arg == null) return [store, identity];
 
@@ -82,6 +82,8 @@ function overload<State extends Entity, Payload, Select>(
 const identity = <T>(a: T) => a;
 const noop = () => {}; // eslint-disable-line @typescript-eslint/no-empty-function
 
-type Unary<St, Out> = (state: St) => Out;
-type UnaryTuple<St, Out = St> = [Slice<St>, Unary<St, Out>];
-type UnaryTriple<St, Payl> = [Slice<St>, Unary<St, St>, Matcher<St, Payl>];
+type Triple<State, Select, Payload> = [
+  Slice<State>,
+  (state: State) => State | Select,
+  Matcher<State, Payload>?
+];

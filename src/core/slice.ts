@@ -33,6 +33,8 @@ export function slice<Root extends Entity, State extends Entity = Root>(
   getState: () => Root,
   setState: (state: Root, action: Action, from: string | symbol) => void
 ): Slice<State> {
+  const sliceKey = subscriptionKey(slicePath);
+
   const getSliceState = (state: Root) =>
     path(state, slicePath as [string]) as State;
 
@@ -45,7 +47,7 @@ export function slice<Root extends Entity, State extends Entity = Root>(
       return;
     }
 
-    setState(state, action, subscriptionKey(slicePath));
+    setState(state, action, sliceKey);
     notify(subscriptions, slicePath, state);
   }
 

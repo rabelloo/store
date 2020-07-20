@@ -346,29 +346,13 @@ You might be familiar with the concept of thunk middleware, or sagas, or asynchr
 Due to how this library has been designed there should be no need for those, see:
 
 ```ts
-// recommended (optimistic)
-async function asyncOptimisticDispatch() {
-  store.dispatch({ type: '[foo] optimistic value set', payload: true });
+const setFoo = store.on('[foo] success / set', (_, foo: string) => foo);
+const asyncSetFoo = store.on('[foo] async set', (state) => {
+  fetch('my/api').then(setFoo);
+  return state;
+});
 
-  try {
-    const payload = await fetch('my/api');
-    store.dispatch({ type: '[foo] success', payload });
-  } catch (error) {
-    store.dispatch({ type: '[foo] failed to fetch value' });
-  }
-}
-
-// recommended (pessimistic)
-async function asyncPessimisticDispatch() {
-  store.dispatch({ type: '[foo] start loading' });
-
-  try {
-    const payload = await fetch('my/api');
-    store.dispatch({ type: '[foo] success / value set', payload });
-  } catch (error) {
-    store.dispatch({ type: '[foo] failed to fetch value' });
-  }
-}
+asyncSetFoo();
 ```
 
 But if for some reason you like async middleware feel free to use it.

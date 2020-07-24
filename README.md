@@ -302,13 +302,13 @@ They execute in the order in which they are provided on `createStore()`.
 
 There are some middleware provided, those with an \* are applied by default when `mode === 'development'`:
 
-- \*[Freeze](/src/middleware/freeze) - Deeply freezes every action's payload dispatched to store.
+- \*[Freeze](/src/middleware/freeze.ts) - Deeply freezes every action's payload dispatched to store.
   - Useful to ensure state is immutable.
   - Not recommended in `production` because performance.
-- \*[Logger](/src/middleware/logger) - Logs all middleware arguments on every action dispatch to store.
+- \*[Logger](/src/middleware/logger.ts) - Logs all middleware arguments on every action dispatch to store.
   - Useful to track changes and debug state.
   - Not recommended in `production` because it exposes internal state to console.
-- [Persist](/src/middleware/persist) - Persists state to localStorage and hydrates from it on init.
+- [Persist](/src/middleware/persist.ts) - Persists state to localStorage and hydrates from it on init.
   - Useful when using Hot Module Reload or Fast Refresh.
   - Useful when you want the entire state to persist across sessions.
 

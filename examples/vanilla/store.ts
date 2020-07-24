@@ -1,4 +1,4 @@
-import { createStore, persist, logger, freeze } from '../../src';
+import { createStore, freeze, logger, persist } from '../../src';
 
 const initialState: State = {
   bar: 'bar',

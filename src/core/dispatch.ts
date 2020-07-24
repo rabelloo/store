@@ -1,4 +1,4 @@
-import type { Action, Reducers } from '../shared.types';
+import type { Action, Immutable, Reducers } from '../shared.types';
 
 /**
  * Dispatches an `action` to the appropriate reducer according to `action.type`.
@@ -7,10 +7,10 @@ import type { Action, Reducers } from '../shared.types';
  * @param action Action to reduce.
  * @throws When reducer for `action.type` is not found.
  */
-export function dispatch<S, P>(
-  reducers: Reducers<S>,
-  state: S,
-  action: Action<P>
+export function dispatch<State, Payload>(
+  reducers: Reducers<State>,
+  state: Immutable<State>,
+  action: Action<Payload>
 ) {
   const { payload, type } = action;
   const reduce = reducers[type];

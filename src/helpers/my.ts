@@ -12,7 +12,7 @@ import type { Entity } from '../shared.types';
  * // ['foo', 'bar']
  */
 export function my<T extends Entity>(): My<T> {
-  const at = (...path: readonly string[]) => path;
+  const at = (...path: ReadonlyArray<string>) => path;
 
   return { at } as My<T>;
 }

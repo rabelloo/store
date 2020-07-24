@@ -1,6 +1,6 @@
-import { useStore } from './useStore';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import type { Store } from '../createStore';
-import { useContext, useMemo, useState, useEffect } from 'react';
+import { useStore } from './useStore';
 
 jest.mock('react', () => {
   const setState = jest.fn();

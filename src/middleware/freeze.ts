@@ -1,4 +1,4 @@
-import type { Entity } from '../shared.types';
+import type { Entity, Immutable } from '../shared.types';
 import type { Middleware } from './middleware.type';
 
 /**
@@ -7,14 +7,14 @@ import type { Middleware } from './middleware.type';
  * @note Recommended usage only in `development` mode.
  */
 export function freeze<State>(): Middleware<State> {
-  return ({ nextState }) => deepFreeze(nextState);
+  return ({ nextState }) => deepFreeze(nextState as State);
 }
 
-function deepFreeze<T>(value: T): Readonly<T> {
+function deepFreeze<T>(value: T): Immutable<T> {
   if (!needsFreeze(value)) return value;
 
   Object.values(value).forEach(deepFreeze);
-  return Object.freeze(value);
+  return Object.freeze(value) as Immutable<T>;
 }
 
 function needsFreeze(value: unknown): value is Entity | [] {

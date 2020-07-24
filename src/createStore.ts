@@ -4,7 +4,13 @@ import type { Slice } from './core/slice.type';
 import { freeze } from './middleware/freeze';
 import { logger } from './middleware/logger';
 import type { Middleware } from './middleware/middleware.type';
-import type { Entity, Mode, Reducers, Subscriptions } from './shared.types';
+import type {
+  Entity,
+  Immutable,
+  Mode,
+  Reducers,
+  Subscriptions,
+} from './shared.types';
 
 /**
  * Creates a new `Store` for state that can be subscribed for changes,
@@ -17,13 +23,13 @@ import type { Entity, Mode, Reducers, Subscriptions } from './shared.types';
  * createStore({ foo: 'bar' });
  */
 export function createStore<State extends Entity>(
-  initialState: State,
+  initialState: Immutable<State>,
   {
     mode = config.mode,
     middleware = mode === 'development' ? [logger(), freeze()] : [],
   }: Config<State> = {}
 ): Store<State> {
-  let state: State;
+  let state: Immutable<State>;
   const reducers: Reducers<State> = {};
   const subscriptions: Subscriptions<State> = {};
 
@@ -42,7 +48,10 @@ export function createStore<State extends Entity>(
     }
   );
 
-  const init = store.on('@store init', (_, state: State) => state);
+  const init = store.on(
+    '@store init',
+    (_, state: State) => state as Immutable<State>
+  );
 
   init(initialState);
 

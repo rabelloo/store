@@ -1,4 +1,4 @@
-import type { Entity } from '../shared.types';
+import type { Entity, Immutable } from '../shared.types';
 
 /**
  * Merges `obj` at `path` with `value`.
@@ -15,8 +15,8 @@ import type { Entity } from '../shared.types';
  * // { a: 1, foo: { b: 2, bar: 5 } }
  */
 export const mergeAt: MergeAt = <T extends Entity>(
-  obj: T,
-  path: Arr,
+  obj: Immutable<T>,
+  path: ReadonlyArray<string>,
   value: unknown
 ) => {
   if (!path.length) return value;
@@ -34,8 +34,6 @@ export const mergeAt: MergeAt = <T extends Entity>(
 
   return clone;
 };
-
-type Arr = readonly string[];
 
 interface MergeAt {
   /**
@@ -95,4 +93,9 @@ interface MergeAt {
     path: [A, B, C, D, E],
     value: T[A][B][C][D][E]
   ): T;
+
+  /**
+   * Untyped overload, prefer using another.
+   */
+  <T extends Entity>(obj: T, path: ReadonlyArray<string>, value: unknown): T;
 }

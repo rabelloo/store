@@ -1,7 +1,7 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import type { Slice } from '../core/slice.type';
 import type { Store } from '../createStore';
-import type { Dispatcher, Entity, Index } from '../shared.types';
+import type { Dispatcher, Entity, Immutable, Index } from '../shared.types';
 import type { Matcher } from './matcher.type';
 /* eslint-disable react-hooks/exhaustive-deps */
 
@@ -16,7 +16,9 @@ import type { Matcher } from './matcher.type';
 export function useStore<State extends Entity, Select, Payload>(
   StoreContext: React.Context<Store<State>>,
   dispatchers: Index<Dispatcher<unknown>>,
-  arg?: ((state: State) => Select) | Matcher<State, Payload>
+  arg?:
+    | ((state: Immutable<State>) => Immutable<Select>)
+    | Matcher<State, Payload>
 ) {
   const store = useContext(StoreContext);
 
@@ -27,12 +29,13 @@ export function useStore<State extends Entity, Select, Payload>(
   const initialState = useMemo(() => select(slice.state), [slice]);
 
   // actual state control
-  const [state, setState] = useState<State | Select>(initialState);
+  const [state, setState] = useState<Immutable<State | Select>>(initialState);
 
   // subscribe to changes to refresh state
-  useEffect(() => {
-    return slice.subscribe((state: State) => setState(select(state)));
-  }, [slice]);
+  useEffect(
+    () => slice.subscribe((state: Immutable<State>) => setState(select(state))),
+    [slice]
+  );
 
   // types can only be registered once,
   // so we cache the dispatcher and retrieve it.
@@ -61,7 +64,9 @@ function getDispatcher<State extends Entity, Payload>(
 
 function overload<State extends Entity, Payload, Select>(
   store: Store<State>,
-  arg?: ((state: State) => Select) | Matcher<State, Payload, any> // eslint-disable-line @typescript-eslint/no-explicit-any
+  arg?:
+    | ((state: Immutable<State>) => Immutable<Select>)
+    | Matcher<State, Payload, any> // eslint-disable-line @typescript-eslint/no-explicit-any
 ): Triple<State, Select, Payload> {
   // useStore()
   if (arg == null) return [store, identity];
@@ -84,6 +89,6 @@ const noop = () => {}; // eslint-disable-line @typescript-eslint/no-empty-functi
 
 type Triple<State, Select, Payload> = [
   Slice<State>,
-  (state: State) => State | Select,
+  (state: Immutable<State>) => Immutable<State | Select>,
   Matcher<State, Payload>?
 ];

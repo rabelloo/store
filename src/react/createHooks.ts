@@ -1,5 +1,5 @@
 import type { Store } from '../createStore';
-import type { Dispatcher, Entity, Index } from '../shared.types';
+import type { Dispatcher, Entity, Immutable, Index } from '../shared.types';
 import type { Matcher } from './matcher.type';
 import { useStore } from './useStore';
 import type { UseStore } from './useStore.type';
@@ -20,6 +20,6 @@ export function createHooks<State extends Entity>(
 }
 
 type Arg<State extends Entity> =
-  | ((state: State) => unknown)
+  | ((state: Immutable<State>) => unknown)
   | Matcher<State, unknown>
   | undefined;

@@ -1,4 +1,10 @@
-import type { Action, Entity, Reducer, Subscription } from '../shared.types';
+import type {
+  Action,
+  Entity,
+  Immutable,
+  Reducer,
+  Subscription,
+} from '../shared.types';
 
 export interface Slice<State extends Entity> {
   /**
@@ -26,13 +32,13 @@ export interface Slice<State extends Entity> {
   on<Payload>(
     type: string,
     reducer: Reducer<State, Payload>
-  ): (payload: Payload) => void;
+  ): (payload: Immutable<Payload>) => void;
   /** Path to this slice as a `string[]`. Empty array if root `@store`. */
-  readonly path: Arr;
+  readonly path: ReadonlyArray<string>;
   /** Creates a slice of `state` that proxies methods for convenience. */
   slice: SliceAt<State>;
   /** Readonly `state` of the slice. */
-  readonly state: State;
+  readonly state: Immutable<State>;
   /**
    * Subscribes to this slice's state changes.
    * @param subscription Function to execute when this slice's state changes.
@@ -42,8 +48,6 @@ export interface Slice<State extends Entity> {
    */
   subscribe(subscription: Subscription<State>): () => void;
 }
-
-type Arr = readonly string[];
 
 interface SliceAt<S extends Entity> {
   /**

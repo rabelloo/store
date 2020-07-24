@@ -1,7 +1,9 @@
+import { mergeAt } from '../helpers/mergeAt';
 import { path } from '../helpers/path';
 import type {
   Action,
   Entity,
+  Immutable,
   Mode,
   Reducers,
   Subscriptions,
@@ -12,7 +14,6 @@ import { register } from './register';
 import { slice } from './slice';
 import { subscribe } from './subscribe';
 import { subscriptionKey } from './subscriptionKey';
-import { mergeAt } from '../helpers/mergeAt';
 
 jest.mock('../helpers/mergeAt', () => ({ mergeAt: jest.fn((a: any) => a) }));
 jest.mock('../helpers/path', () => ({ path: jest.fn((a: any) => a) }));
@@ -26,13 +27,13 @@ jest.mock('./subscriptionKey', () => ({
 
 describe('slice', () => {
   const create = <State extends Entity>({
-    state = {} as State,
+    state = {} as Immutable<State>,
     slicePath = [] as const,
     mode = 'development',
     reducers = {},
     subscriptions = {},
     getState = () => state,
-    setState = (value: State) => (state = value),
+    setState = (value: Immutable<State>) => (state = value),
   }: SliceConfig<State> = {}) =>
     slice(slicePath, mode, reducers, subscriptions, getState, setState);
 
@@ -228,11 +229,15 @@ describe('slice', () => {
 });
 
 interface SliceConfig<State> {
-  state?: State;
-  slicePath?: readonly string[];
+  state?: Immutable<State>;
+  slicePath?: ReadonlyArray<string>;
   mode?: Mode;
   reducers?: Reducers<State>;
   subscriptions?: Subscriptions<State>;
-  getState?: () => State;
-  setState?: (state: State, action: Action, from: string | symbol) => void;
+  getState?: () => Immutable<State>;
+  setState?: (
+    state: Immutable<State>,
+    action: Action,
+    from: string | symbol
+  ) => void;
 }

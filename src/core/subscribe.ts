@@ -1,4 +1,4 @@
-import type { Subscription, Subscriptions } from '../shared.types';
+import type { Immutable, Subscription, Subscriptions } from '../shared.types';
 import { subscriptionKey } from './subscriptionKey';
 
 /**
@@ -10,8 +10,8 @@ import { subscriptionKey } from './subscriptionKey';
  */
 export function subscribe<State>(
   subscriptions: Subscriptions<State>,
-  path: Arr,
-  state: State,
+  path: ReadonlyArray<string>,
+  state: Immutable<State>,
   subscription: Subscription<State>
 ) {
   // immediately notify of current state
@@ -32,7 +32,10 @@ export function subscribe<State>(
   return () => entry.subscriptions.delete(subscription);
 }
 
-function get<State>(subscriptions: Subscriptions<State>, path: Arr) {
+function get<State>(
+  subscriptions: Subscriptions<State>,
+  path: ReadonlyArray<string>
+) {
   const key = subscriptionKey(path) as string;
 
   // TODO: refactor to ??= in TypeScript 4.0
@@ -42,5 +45,3 @@ function get<State>(subscriptions: Subscriptions<State>, path: Arr) {
 
   return { entry, key };
 }
-
-type Arr = readonly string[];

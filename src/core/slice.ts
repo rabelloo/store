@@ -3,10 +3,10 @@ import { path } from '../helpers/path';
 import type {
   Action,
   Entity,
+  Immutable,
   Mode,
   Reducers,
   Subscriptions,
-  Reducer,
 } from '../shared.types';
 import { dispatch } from './dispatch';
 import { notify } from './notify';
@@ -26,20 +26,24 @@ import { subscriptionKey } from './subscriptionKey';
  * @param setState Function to update `@store` root state.
  */
 export function slice<Root extends Entity, State extends Entity = Root>(
-  slicePath: Arr,
+  slicePath: ReadonlyArray<string>,
   mode: Mode,
   reducers: Reducers<Root>,
   subscriptions: Subscriptions<Root>,
-  getState: () => Root,
-  setState: (state: Root, action: Action, from: string | symbol) => void
+  getState: () => Immutable<Root>,
+  setState: (
+    state: Immutable<Root>,
+    action: Action,
+    from: string | symbol
+  ) => void
 ): Slice<State> {
   const sliceKey = subscriptionKey(slicePath);
 
-  const getSliceState = (state: Root) =>
-    path(state, slicePath as [string]) as State;
+  const getSliceState = (state: Immutable<Root>) =>
+    path(state, slicePath as [string]) as Immutable<State>;
 
   function sliceDispatch<Payload>(action: Action<Payload>) {
-    let state: Root;
+    let state: Immutable<Root>;
     try {
       state = dispatch(reducers, getState(), action);
     } catch (error) {
@@ -53,16 +57,11 @@ export function slice<Root extends Entity, State extends Entity = Root>(
 
   return {
     dispatch: sliceDispatch,
-    on<Payload>(
-      type: string,
-      reducer: Reducer<State, Payload>
-    ): (payload: Payload) => void {
-      const proxy = (state: Root, payload: Payload) =>
-        mergeAt(
-          state,
-          slicePath as [keyof Root],
-          reducer(getSliceState(state), payload) as Root[keyof Root]
-        );
+    on(type, reducer) {
+      type Payload = Parameters<typeof reducer>[1];
+
+      const proxy = (state: Immutable<Root>, payload: Payload) =>
+        mergeAt(state, slicePath, reducer(getSliceState(state), payload));
 
       register(reducers, type, proxy);
 
@@ -71,7 +70,7 @@ export function slice<Root extends Entity, State extends Entity = Root>(
     get path() {
       return slicePath;
     },
-    slice(...subPath: Arr) {
+    slice(...subPath: ReadonlyArray<string>) {
       return slice(
         slicePath.concat(subPath),
         mode,
@@ -85,11 +84,10 @@ export function slice<Root extends Entity, State extends Entity = Root>(
       return getSliceState(getState());
     },
     subscribe(subscription) {
-      const proxy = (state: Root) => subscription(getSliceState(state));
+      const proxy = (state: Immutable<Root>) =>
+        subscription(getSliceState(state));
 
       return subscribe(subscriptions, slicePath, getState(), proxy);
     },
   };
 }
-
-type Arr = readonly string[];

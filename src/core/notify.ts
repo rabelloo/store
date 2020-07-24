@@ -1,4 +1,4 @@
-import type { Subscriptions } from '../shared.types';
+import type { Immutable, Subscriptions } from '../shared.types';
 import { subscriptionKey } from './subscriptionKey';
 
 /**
@@ -40,8 +40,8 @@ import { subscriptionKey } from './subscriptionKey';
  */
 export function notify<State>(
   subscriptions: Subscriptions<State>,
-  path: Arr,
-  state: State
+  path: ReadonlyArray<string>,
+  state: Immutable<State>
 ) {
   const entry = pathNotify(subscriptions, path, state);
 
@@ -59,8 +59,8 @@ export function notify<State>(
 
 function pathNotify<State>(
   subscriptions: Subscriptions<State>,
-  path: Arr,
-  state: State
+  path: ReadonlyArray<string>,
+  state: Immutable<State>
 ) {
   const key = subscriptionKey(path) as string;
 
@@ -70,7 +70,7 @@ function pathNotify<State>(
 function entryNotify<State>(
   subscriptions: Subscriptions<State>,
   key: string,
-  state: State
+  state: Immutable<State>
 ) {
   const entry = subscriptions[key];
 
@@ -78,5 +78,3 @@ function entryNotify<State>(
 
   return entry;
 }
-
-type Arr = readonly string[];

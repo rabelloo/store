@@ -1,27 +1,18 @@
-const config = {
-  get mode() {
-    return jest.requireActual('./config').config.mode;
-  },
-};
-
 describe('config', () => {
   beforeEach(jest.resetModules);
 
-  it('should use `NODE_ENV` for `mode`', () => {
+  it('should use `NODE_ENV` for `mode`', async () => {
     const mode = 'test';
     process.env.NODE_ENV = mode;
+    const { config } = await import('./config');
 
-    const result = config.mode;
-
-    expect(result).toBe(mode);
+    expect(config.mode).toBe(mode);
   });
 
-  it('should ignore unsupported modes and default to "production"', () => {
-    const mode = 'foo';
-    process.env.NODE_ENV = mode;
+  it('should ignore unsupported modes and default to "production"', async () => {
+    process.env.NODE_ENV = '';
+    const { config } = await import('./config');
 
-    const result = config.mode;
-
-    expect(result).toBe('production');
+    expect(config.mode).toBe('production');
   });
 });

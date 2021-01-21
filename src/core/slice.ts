@@ -65,7 +65,8 @@ export function slice<Root extends Entity, State extends Entity = Root>(
 
       register(reducers, type, proxy);
 
-      return (payload) => sliceDispatch({ payload, type });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return ((payload: Payload) => sliceDispatch({ payload, type })) as any;
     },
     get path() {
       return slicePath;

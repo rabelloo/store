@@ -1,5 +1,5 @@
 import type { Store } from '../createStore';
-import type { Dispatcher, Entity, Immutable, Index } from '../shared.types';
+import type { Entity, Immutable } from '../shared.types';
 import type { Matcher } from './matcher.type';
 import { useStore } from './useStore';
 import type { UseStore } from './useStore.type';
@@ -11,15 +11,12 @@ import type { UseStore } from './useStore.type';
 export function createHooks<State extends Entity>(
   StoreContext: React.Context<Store<State>>
 ) {
-  const dispatchers: Index<Dispatcher<unknown>> = {};
-
   return {
-    useStore: ((arg: Arg<State>) =>
-      useStore(StoreContext, dispatchers, arg)) as UseStore<State>,
+    useStore: ((arg?: Arg<State>) =>
+      useStore(StoreContext, arg)) as UseStore<State>,
   };
 }
 
 type Arg<State extends Entity> =
   | ((state: Immutable<State>) => unknown)
-  | Matcher<State, unknown>
-  | undefined;
+  | Matcher<State, unknown>;

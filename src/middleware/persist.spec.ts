@@ -5,13 +5,14 @@ describe('persist', () => {
   const id = `@store ${appId}`;
   const initType = '@store init';
   const persist = persistMiddleware(appId);
-  global.localStorage = { getItem: jest.fn(), setItem: jest.fn() } as any;
+  const localStorage = { getItem: jest.fn(), setItem: jest.fn() };
+  Object.defineProperty(window, 'localStorage', { value: localStorage });
 
   it('should hydrate on @store init', () => {
     const action = { type: initType };
     const init = { foo: 'bar' };
     const hydrate = JSON.stringify(init);
-    (localStorage.getItem as jest.Mock).mockReturnValueOnce(hydrate);
+    localStorage.getItem.mockReturnValueOnce(hydrate);
 
     const result = persist({ action } as any);
 

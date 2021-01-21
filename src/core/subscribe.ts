@@ -38,10 +38,10 @@ function get<State>(
 ) {
   const key = subscriptionKey(path) as string;
 
-  // TODO: refactor to ??= in TypeScript 4.0
-  const entry =
-    subscriptions[key] ??
-    (subscriptions[key] = { children: new Set(), subscriptions: new Set() });
+  const entry = (subscriptions[key] ??= {
+    children: new Set(),
+    subscriptions: new Set(),
+  });
 
   return { entry, key };
 }

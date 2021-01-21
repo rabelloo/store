@@ -1,8 +1,8 @@
-import { createStore } from './createStore';
+import { config } from './config';
 import { slice } from './core/slice';
+import { createStore } from './createStore';
 import { freeze } from './middleware/freeze';
 import { logger } from './middleware/logger';
-import { config } from './config';
 
 jest.mock('./config', () => ({ config: { mode: 'test' } }));
 jest.mock('./core/slice', () => ({ slice: jest.fn() }));
@@ -51,7 +51,7 @@ describe('createStore', () => {
 
   it('should apply middleware on setState()', () => {
     let getState = () => ({});
-    let setState = (..._: any[]) => {};
+    let setState = (...state: any[]) => void state;
     const nextState = {};
     const action = {};
     const from = '~foo';

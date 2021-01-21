@@ -19,7 +19,7 @@ describe('createHooks', () => {
       const result = hooks.useStore(arg);
 
       expect(result).toBe(StoreContext);
-      expect(useStore).toBeCalledWith(StoreContext, {}, arg);
+      expect(useStore).toBeCalledWith(StoreContext, arg);
     });
   });
 });

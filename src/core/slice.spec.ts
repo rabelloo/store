@@ -144,7 +144,7 @@ describe('slice', () => {
     it('should return a dispatcher of an action with type and payload specified', () => {
       const payload = {};
       const action = { type, payload };
-      const dispatcher = slice.on(type, reducer);
+      const dispatcher = slice.on(type, (_, p: typeof payload) => p);
 
       dispatcher(payload);
 

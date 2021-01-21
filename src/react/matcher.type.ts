@@ -8,7 +8,7 @@ export interface Matcher<
   /** A reducer that gets the action payload directly when the type matches. */
   readonly reduce: (
     state: Immutable<State>,
-    payload: Immutable<Payload>
+    payload: Payload
   ) => Immutable<State>;
   /** Path of the `@store` slice. */
   readonly slice?: Path;

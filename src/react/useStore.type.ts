@@ -1,4 +1,4 @@
-import type { Dispatcher, Entity } from '../shared.types';
+import type { Entity, MaybeOptional } from '../shared.types';
 import type { Matcher } from './matcher.type';
 
 export interface UseStore<State extends Entity> {
@@ -28,9 +28,10 @@ export interface UseStore<State extends Entity> {
    * });
    * setRootState({ foo: 'bar' });
    */
-  <Payload>(matcher: Matcher<State, Payload, undefined>): [
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  <M extends Matcher<State, any, undefined>>(matcher: M): [
     State,
-    Dispatcher<Payload>
+    DispatcherOf<M>
   ];
 
   /**
@@ -46,9 +47,10 @@ export interface UseStore<State extends Entity> {
    * modifyCount(1);
    * modifyCount(-1);
    */
-  <Payload, A extends keyof State>(matcher: Matcher<State[A], Payload, [A]>): [
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  <M extends Matcher<State[A], any, [A]>, A extends keyof State>(matcher: M): [
     State[A],
-    Dispatcher<Payload>
+    DispatcherOf<M>
   ];
 
   /**
@@ -64,9 +66,14 @@ export interface UseStore<State extends Entity> {
    * modifyCount(1);
    * modifyCount(-1);
    */
-  <Payload, A extends keyof State, B extends keyof State[A]>(
-    matcher: Matcher<State[A][B], Payload, [A, B]>
-  ): [State[A][B], Dispatcher<Payload>];
+  <
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    M extends Matcher<State[A][B], any, [A, B]>,
+    A extends keyof State,
+    B extends keyof State[A]
+  >(
+    matcher: M
+  ): [State[A][B], DispatcherOf<M>];
 
   /**
    * Use `@store[slice]` state and configure a dispatcher for the slice.
@@ -82,13 +89,14 @@ export interface UseStore<State extends Entity> {
    * modifyCount(-1);
    */
   <
-    Payload,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    M extends Matcher<State[A][B][C], any, [A, B, C]>,
     A extends keyof State,
     B extends keyof State[A],
     C extends keyof State[A][B]
   >(
-    matcher: Matcher<State[A][B][C], Payload, [A, B, C]>
-  ): [State[A][B][C], Dispatcher<Payload>];
+    matcher: M
+  ): [State[A][B][C], DispatcherOf<M>];
 
   /**
    * Use `@store[slice]` state and configure a dispatcher for the slice.
@@ -104,14 +112,15 @@ export interface UseStore<State extends Entity> {
    * modifyCount(-1);
    */
   <
-    Payload,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    M extends Matcher<State[A][B][C][D], any, [A, B, C, D]>,
     A extends keyof State,
     B extends keyof State[A],
     C extends keyof State[A][B],
     D extends keyof State[A][B][C]
   >(
-    matcher: Matcher<State[A][B][C][D], Payload, [A, B, C, D]>
-  ): [State[A][B][C][D], Dispatcher<Payload>];
+    matcher: M
+  ): [State[A][B][C][D], DispatcherOf<M>];
 
   /**
    * Use `@store[slice]` state and configure a dispatcher for the slice.
@@ -127,13 +136,21 @@ export interface UseStore<State extends Entity> {
    * modifyCount(-1);
    */
   <
-    Payload,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    M extends Matcher<State[A][B][C][D][E], any, [A, B, C, D, E]>,
     A extends keyof State,
     B extends keyof State[A],
     C extends keyof State[A][B],
     D extends keyof State[A][B][C],
     E extends keyof State[A][B][C][D]
   >(
-    matcher: Matcher<State[A][B][C][D][E], Payload, [A, B, C, D, E]>
-  ): [State[A][B][C][D][E], Dispatcher<Payload>];
+    matcher: M
+  ): [State[A][B][C][D][E], DispatcherOf<M>];
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DispatcherOf<T> = T extends Matcher<any, void, any>
+  ? () => void
+  : T extends Matcher<any, infer Payload, any> // eslint-disable-line @typescript-eslint/no-explicit-any
+  ? (payload: MaybeOptional<Payload>) => void
+  : never;

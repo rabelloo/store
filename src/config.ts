@@ -1,11 +1,9 @@
 import type { Mode } from './shared.types';
 
-const { NODE_ENV } = process.env;
+const env = process.env.NODE_ENV || '';
 
-const supportedModes = ['production', 'development', 'test'] as const;
+const supportedModes = ['production', 'development', 'test'];
 
-const mode: Mode = supportedModes.includes(NODE_ENV as Mode)
-  ? (NODE_ENV as Mode)
-  : 'production';
+const mode: Mode = supportedModes.includes(env) ? (env as Mode) : 'production';
 
 export const config = { mode };

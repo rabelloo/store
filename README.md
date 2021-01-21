@@ -354,18 +354,3 @@ const asyncSetFoo = store.on('[foo] async set', (state) => {
 
 asyncSetFoo();
 ```
-
-But if for some reason you like async middleware feel free to use it.
-
-```ts
-// not recommended, but one example
-export function asyncMiddleware<State>(): Middleware<State> {
-  return async ({ action, from, nextState, state }) => {
-    return await nextState;
-  };
-}
-
-const asyncSetFoo = store.on('[foo] async set', () => fetch('my/api'));
-
-asyncSetFoo();
-```

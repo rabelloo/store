@@ -2,6 +2,7 @@ import type {
   Action,
   Entity,
   Immutable,
+  MaybeOptional,
   Reducer,
   Subscription,
 } from '../shared.types';
@@ -29,10 +30,8 @@ export interface Slice<State extends Entity> {
    * );
    * overrideState({ foo: 'bar' });
    */
-  on<Payload>(
-    type: string,
-    reducer: Reducer<State, Payload>
-  ): (payload: Immutable<Payload>) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  on<R extends Reducer<State, any>>(type: string, reducer: R): DispatcherOf<R>;
   /** Path to this slice as a `string[]`. Empty array if root `@store`. */
   readonly path: ReadonlyArray<string>;
   /** Creates a slice of `state` that proxies methods for convenience. */
@@ -48,6 +47,13 @@ export interface Slice<State extends Entity> {
    */
   subscribe(subscription: Subscription<State>): () => void;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DispatcherOf<T> = T extends Reducer<any, void>
+  ? () => void
+  : T extends Reducer<any, infer Payload> // eslint-disable-line @typescript-eslint/no-explicit-any
+  ? (payload: MaybeOptional<Payload>) => void
+  : never;
 
 interface SliceAt<S extends Entity> {
   /**

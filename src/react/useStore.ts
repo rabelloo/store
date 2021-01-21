@@ -1,9 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useContext, useEffect, useMemo, useState } from 'react';
 import type { Slice } from '../core/slice.type';
 import type { Store } from '../createStore';
-import type { Dispatcher, Entity, Immutable, Index } from '../shared.types';
+import type { Entity, Immutable, MaybeOptional } from '../shared.types';
 import type { Matcher } from './matcher.type';
-/* eslint-disable react-hooks/exhaustive-deps */
 
 /**
  * Base implementation of `useStore`.
@@ -15,7 +15,6 @@ import type { Matcher } from './matcher.type';
  */
 export function useStore<State extends Entity, Select, Payload>(
   StoreContext: React.Context<Store<State>>,
-  dispatchers: Index<Dispatcher<unknown>>,
   arg?:
     | ((state: Immutable<State>) => Immutable<Select>)
     | Matcher<State, Payload>
@@ -23,43 +22,31 @@ export function useStore<State extends Entity, Select, Payload>(
   const store = useContext(StoreContext);
 
   // overload management
-  const [slice, select, matcher] = useMemo(() => overload(store, arg), [store]);
+  const [slice, select, matcher] = useMemo(() => overload(store, arg), []);
 
-  // avoid too much selection if avoidable
-  const initialState = useMemo(() => select(slice.state), [slice]);
+  // actual state, lazily initialised
+  const [state, setState] = useState(() => select(slice.state));
 
-  // actual state control
-  const [state, setState] = useState<Immutable<State | Select>>(initialState);
+  // Types can only be registered once,
+  // so we have to guarantee `slice.on` is only ever called once
+  // and that the dispatcher is always the same.
+  // `<React.StrictMode>` renders components twice,
+  // so unfortunately we can't use lazily initialised `useState`, e.g.
+  // useState(() => matcher ? slice.on(matcher.type, matcher.reduce) : noop);
+  // We can't use `useCallback` because it can't be initialised,
+  // and we can't use `useMemo` because it's not semantically guaranteed.
+  // `useEffect(, [])` is the only thing guaranteed to only run once.
+  type Dispatch = (payload: MaybeOptional<Payload>) => void;
+  const [dispatcher, setDispatcher] = useState<Dispatch>(() => noop);
+  useEffect(() => {
+    /* istanbul ignore else */
+    if (matcher) setDispatcher(slice.on(matcher.type, matcher.reduce));
+  }, []);
 
   // subscribe to changes to refresh state
-  useEffect(
-    () => slice.subscribe((state: Immutable<State>) => setState(select(state))),
-    [slice]
-  );
+  useEffect(() => slice.subscribe((state) => setState(select(state))), []);
 
-  // types can only be registered once,
-  // so we cache the dispatcher and retrieve it.
-  // We don't `useState` it either to prevent re-renders
-  const dispatch = getDispatcher(dispatchers, slice, matcher);
-
-  return [state, dispatch];
-}
-
-function getDispatcher<State extends Entity, Payload>(
-  dispatchers: Index<Dispatcher<unknown>>,
-  slice: Slice<State>,
-  matcher?: Matcher<State, Payload>
-) {
-  if (!matcher) return noop;
-
-  const { reduce, type } = matcher;
-
-  const cached = dispatchers[type];
-  if (cached) return cached;
-
-  const dispatch = slice.on(type, reduce);
-  dispatchers[type] = dispatch;
-  return dispatch;
+  return [state, dispatcher];
 }
 
 function overload<State extends Entity, Payload, Select>(

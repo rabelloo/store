@@ -27,10 +27,12 @@ export const mergeAt: MergeAt = <T extends Entity>(
 
   const cursor = way.reduce(
     (next, key) => (next[key] = { ...next[key] }),
-    clone as Record<string, Record<string, unknown>>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    clone as Record<string, Record<string, any>>
   );
 
-  cursor[last] = value;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  cursor[last] = value as any;
 
   return clone;
 };

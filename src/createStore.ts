@@ -48,12 +48,9 @@ export function createStore<State extends Entity>(
     }
   );
 
-  const init = store.on(
-    '@store init',
-    (_, state: State) => state as Immutable<State>
-  );
+  const init = store.on('@store init', (_, state: Immutable<State>) => state);
 
-  init(initialState);
+  init(initialState as never);
 
   return store;
 }

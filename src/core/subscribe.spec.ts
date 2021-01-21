@@ -67,7 +67,7 @@ describe('subscribe', () => {
   });
 
   describe('unsubscribe', () => {
-    it('should remove from subscriptions Set ', () => {
+    it('should remove from subscriptions Set', () => {
       const subscription = jest.fn();
       const subscriptions = createSubs(key);
 
@@ -79,7 +79,7 @@ describe('subscribe', () => {
       expect(entry?.subscriptions.size).toBe(0);
     });
 
-    it(`should not remove from parent's children Set `, () => {
+    it(`should not remove from parent's children Set`, () => {
       const subscription = jest.fn();
       const subscriptions = createSubs(key);
 

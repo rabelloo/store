@@ -17,7 +17,7 @@ export function createStoreContext<State extends Entity>(store: Store<State>) {
   /**
    * Provides the store used previously with `createStoreContext(store)`.
    */
-  const StoreProvider = ({ children }: { children: React.ReactNode }) => (
+  const StoreProvider = ({ children }: { children?: React.ReactNode }) => (
     <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
   );
 

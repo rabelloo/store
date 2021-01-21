@@ -9,62 +9,64 @@ jest.mock('react', () => {
     useContext: jest.fn(() => ({})),
     useEffect: jest.fn(),
     useMemo: jest.fn((fn: any) => fn()),
-    useState: jest.fn((state: any) => [state, setState]),
+    useState: jest.fn((stateFn: any) => [stateFn?.(), setState]),
   };
 });
 
 describe('useStore', () => {
   const StoreContext = {} as React.Context<Store<State>>;
 
+  beforeEach(jest.clearAllMocks);
+
   it('should return a tuple of [ state, dispatcher ]', () => {
     const state = {};
     const store = { state };
     (useContext as jest.Mock).mockReturnValueOnce(store);
 
-    const result = useStore(StoreContext, {});
+    const result = useStore(StoreContext);
 
     expect(result[0]).toBe(state);
     expect(result[1]).toStrictEqual(expect.any(Function));
   });
 
   it('should have a dispatcher that does nothing when no matcher is specified', () => {
-    const [, dispatch] = useStore(StoreContext, {});
+    const [, dispatch] = useStore(StoreContext);
 
     expect(dispatch()).toBe(undefined);
   });
 
-  it('should cache dispatchers', () => {
+  it('should maintain dispatcher reference', () => {
     const type = 'foo';
-    const dispatcher = () => {};
-    const dispatchers = { [type]: dispatcher };
 
-    const result = useStore(StoreContext, dispatchers, {
-      type,
-      reduce: (a) => a,
-    });
+    const [, first] = useStore(StoreContext, { type, reduce: (a) => a });
+    const [, second] = useStore(StoreContext, { type, reduce: (a) => a });
 
-    expect(result[1]).toBe(dispatcher);
+    expect(first).toBe(second);
   });
 
-  it('should create dispatcher with slice.on when not yet cached', () => {
+  it('should create dispatcher with slice.on', () => {
     const type = 'foo';
     const reduce = (a: any) => a;
     const dispatcher = () => {};
-    const store = { on: jest.fn(() => dispatcher) };
+    const store = { on: jest.fn(() => () => dispatcher) };
+    const [, setDispatcher] = useState();
     (useContext as jest.Mock).mockReturnValueOnce(store);
+    (useEffect as jest.Mock).mockImplementationOnce((fn) => fn());
 
-    const result = useStore(StoreContext, {}, { type, reduce });
+    const [, noop] = useStore(StoreContext, { type, reduce });
+    const result = (setDispatcher as jest.Mock).mock.calls[0][0]();
 
-    expect(result[1]).toBe(dispatcher);
+    expect(result).toBe(dispatcher);
+    expect(noop()).toBe(undefined);
     expect(store.on).toBeCalledWith(type, reduce);
   });
 
   it('should accept a selector', () => {
     const state = {};
 
-    const result = useStore(StoreContext, {}, () => state);
+    const [result] = useStore(StoreContext, () => state);
 
-    expect(result[0]).toBe(state);
+    expect(result).toBe(state);
   });
 
   it('should accept a matcher without slice', () => {
@@ -74,9 +76,9 @@ describe('useStore', () => {
     const store = { on: () => {}, state };
     (useContext as jest.Mock).mockReturnValueOnce(store);
 
-    const result = useStore(StoreContext, {}, { type, reduce });
+    const [result] = useStore(StoreContext, { type, reduce });
 
-    expect(result[0]).toBe(state);
+    expect(result).toBe(state);
   });
 
   it('should accept a matcher with slice', () => {
@@ -88,14 +90,14 @@ describe('useStore', () => {
     const store = { slice: jest.fn(() => slice) };
     (useContext as jest.Mock).mockReturnValueOnce(store);
 
-    const result = useStore(StoreContext, {}, { type, reduce, slice: path });
+    const [result] = useStore(StoreContext, { type, reduce, slice: path });
 
-    expect(result[0]).toBe(state);
+    expect(result).toBe(state);
     expect(store.slice).toBeCalledWith(...path);
   });
 
   it('should useContext', () => {
-    useStore(StoreContext, {});
+    useStore(StoreContext);
 
     expect(useContext).toBeCalledWith(StoreContext);
   });
@@ -104,9 +106,9 @@ describe('useStore', () => {
     const store = {};
     (useContext as jest.Mock).mockReturnValueOnce(store);
 
-    useStore(StoreContext, {});
+    useStore(StoreContext);
 
-    expect(useMemo).toBeCalledWith(expect.any(Function), [store]);
+    expect(useMemo).toBeCalledWith(expect.any(Function), []);
   });
 
   it('should useState with the inital slice.state', () => {
@@ -114,34 +116,29 @@ describe('useStore', () => {
     const store = { state };
     (useContext as jest.Mock).mockReturnValueOnce(store);
 
-    useStore(StoreContext, {});
+    useStore(StoreContext);
 
-    expect(useState).toBeCalledWith(state);
+    expect(useState).toBeCalledWith(expect.any(Function));
+    const initFn = (useState as jest.Mock).mock.calls[0][0];
+    expect(initFn()).toBe(state);
   });
 
   it('should useEffect to subscribe to slice and setState on changes', () => {
-    let effect = () => {};
-    let subscription = (_: unknown) => {};
     const unsub = {};
     const state = {};
     const [, setState] = useState();
-    const store = {
-      subscribe: jest.fn((subs) => {
-        subscription = subs;
-        return unsub;
-      }),
-    };
+    const store = { subscribe: jest.fn().mockReturnValue(unsub) };
     (useContext as jest.Mock).mockReturnValueOnce(store);
-    (useEffect as jest.Mock).mockImplementationOnce((fn) => {
-      effect = fn;
-    });
-    useStore(StoreContext, {});
 
+    useStore(StoreContext);
+
+    const effect = (useEffect as jest.Mock).mock.calls[1][0];
     const unsubscribe = effect();
+
+    const subscription = store.subscribe.mock.calls[0][0];
     subscription(state);
 
     expect(unsubscribe).toBe(unsub);
-    expect(useEffect).toBeCalledWith(effect, [store]);
     expect(setState).toBeCalledWith(state);
   });
 });

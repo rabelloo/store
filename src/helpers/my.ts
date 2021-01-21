@@ -11,27 +11,51 @@ import type { Entity } from '../shared.types';
  * my<State>().at('foo', 'bar');
  * // ['foo', 'bar']
  */
-export function my<T extends Entity>(): My<T> {
+export function my<State extends Entity>(): My<State> {
   const at = (...path: ReadonlyArray<string>) => path;
 
-  return { at } as My<T>;
+  return { at } as My<State>;
 }
 
-interface My<S> {
-  at: At<S>;
+interface My<State> {
+  at: At<State>;
 }
 
 interface At<S> {
+  /**
+   * Creates strongly-typed `Array<key>` paths for `State`.
+   * @example
+   * at('foo');
+   * // ['foo']
+   */
   <A extends keyof S>(a: A): [A];
 
+  /**
+   * Creates strongly-typed `Array<key>` paths for `State`.
+   * @example
+   * at('foo', 'bar');
+   * // ['foo', 'bar']
+   */
   <A extends keyof S, B extends keyof S[A]>(a: A, b: B): [A, B];
 
+  /**
+   * Creates strongly-typed `Array<key>` paths for `State`.
+   * @example
+   * at('foo', 'bar', 'zed');
+   * // ['foo', 'bar', 'zed']
+   */
   <A extends keyof S, B extends keyof S[A], C extends keyof S[A][B]>(
     a: A,
     b: B,
     c: C
   ): [A, B, C];
 
+  /**
+   * Creates strongly-typed `Array<key>` paths for `State`.
+   * @example
+   * at('foo', 'bar', 'zed', 'yoo');
+   * // ['foo', 'bar', 'zed', 'yoo']
+   */
   <
     A extends keyof S,
     B extends keyof S[A],
@@ -44,6 +68,12 @@ interface At<S> {
     d: D
   ): [A, B, C, D];
 
+  /**
+   * Creates strongly-typed `Array<key>` paths for `State`.
+   * @example
+   * at('foo', 'bar', 'zed', 'yoo', 'lab');
+   * // ['foo', 'bar', 'zed', 'yoo', 'lab']
+   */
   <
     A extends keyof S,
     B extends keyof S[A],
